@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  # Media
+  jellyfin:
+    image: jellyfin/jellyfin
+    restart: 'unless-stopped'
+    depends_on:
+      - nginx-proxy
+    environment:
+      - JELLYFIN_PublishedServerUrl=media.home
+      - VIRTUAL_HOST=$JELLYFIN_HOSTNAME
+      - VIRTUAL_PORT=8096
+      - TZ=$TZ
+    volumes:
+      - ./data/jellyfin/config:/config
+      - ./data/jellyfin/cache:/cache
+      - /mnt/media:/media
+    user: 1000:1000
+    group_add:
+      - "109"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+
+  # Media
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    restart: 'unless-stopped'
+    depends_on:
+      - nginx-proxy
+    environment:
+      - LOG_LEVEL=debug
+      - VIRTUAL_HOST=$JELLYSEERR_HOSTNAME
+      - VIRTUAL_PORT=5055
+      - TZ=$TZ
+    volumes:
+      - ./data/jellyseerr:/app/config
+      
