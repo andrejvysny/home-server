@@ -16,14 +16,15 @@ services:
     depends_on:
       - nginx-proxy
     environment:
-      - JELLYFIN_PublishedServerUrl=media.home
+      - JELLYFIN_PublishedServerUrl=$JELLYFIN_HOSTNAME
       - VIRTUAL_HOST=$JELLYFIN_HOSTNAME
       - VIRTUAL_PORT=8096
       - TZ=$TZ
     volumes:
       - ./data/jellyfin/config:/config
       - ./data/jellyfin/cache:/cache
-      - /mnt/media:/media
+      - /mnt/movies/media:/media/movies
+      - /mnt/shows/media:/media/shows
     user: 1000:1000
     group_add:
       - "109"
